@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile as updateProfileFirebase, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import app from "../firebase/firebase.config";
 
 export const AuthContext = createContext(null);
@@ -59,6 +59,18 @@ const AuthProvider = ({ children }) => {
         }
     }
 
+    const updateProfile = async (photoUrl, name) => {
+        setLoading(true);
+        try {
+            await updateProfileFirebase(auth.currentUser, { displayName: name, photoURL: photoUrl });
+            setUser({ ...user, displayName: name, photoURL: photoUrl });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
         const unSubscribe = onAuthStateChanged(auth, currentUser => {
             setUser(currentUser);
@@ -76,7 +88,8 @@ const AuthProvider = ({ children }) => {
         signIn,
         logOut,
         signInWithGoogle,
-        signInWithFacebook
+        signInWithFacebook,
+        updateProfile
     }
 
     return (
